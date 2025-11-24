@@ -25,7 +25,7 @@ Game Engine for the PS2, currently doing a demo game to test its functionality
 
 - [x] Pushing Cube to GS
 - [x] Input Handler
-- [ ] LookAt Transformation
+- [x] LookAt Transformation (kindof buggy)
 - [ ] True Asset Importer
 - [ ] Texturing
 - [ ] Using Vector Units for Linear Transformations
