@@ -1,7 +1,6 @@
 #Makefile by Tom Marks
 #Needs to run in linux subsystem (bash)
 
-
 EE_BIN=test.elf
 EE_OBJS=main.o
 
