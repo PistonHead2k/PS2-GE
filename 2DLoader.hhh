@@ -1,0 +1,276 @@
+//Mesh Loader by PistonHead2k
+
+#ifndef Loader
+#define Loader
+
+namespace Load
+{
+
+/* Mesh */
+struct mesh_t
+{
+    /* Mesh Name */
+    char *Name;
+    /* Number of Triangles */
+    uint16_t FaceCount;
+    /* Triangle Array */
+    triangle_t *Triangle;
+};
+
+/* Scene */
+struct scene_t
+{
+    /* Number of Meshes in Mesh[]*/
+    uint8_t MeshCount; 
+    /* Mesh Array */
+    mesh_t *Mesh;
+};
+
+scene_t Scene;
+
+#include "Scene.h"
+
+//Error Definitions
+/* */
+#define FILE_ERROR -1
+//-----------------
+
+
+const char *ErrorHandler(int Function) //Remember to add erorr codes
+{
+    switch(Function)
+    {
+        case FILE_ERROR:
+        return "FILE ERROR";
+        break;
+        default: "FILE LOADED SUCCESFULLY";
+    }
+}
+
+#include <stdio.h>
+/* Opens a File in the Heap */
+/* Make Sure to free() after use */
+char* File(const char *fpath) //MAKE ERROR CODES
+{
+    //fopen in read mode.
+    FILE *fstream = fopen(fpath, "r");
+
+    //Seek how many bytes are in the file.
+    fseek(fstream, 0L, SEEK_END);
+    int fBytes = ftell(fstream);
+    fseek(fstream, 0L, SEEK_SET);
+
+    //char fstring[fBytes];
+    char *fstring = (char*)malloc(fBytes);
+
+    fread(fstring, 1, fBytes, fstream);
+    fclose(fstream);
+    
+    //Prints The File Contents.
+    //printf(fstring);
+
+    return fstring;
+}
+
+#include <string.h>
+/* Removes Substring from String */
+void strremove(char *str, const char *substr) 
+{
+    char *p, *q, *r;
+    if (*substr && (q = r = strstr(str, substr)) != NULL) {
+        
+        //Caps String Size as 254 + '\n' characters.
+        uint8_t len = strlen(substr);
+
+        while ((r = strstr(p = r + len, substr)) != NULL)
+        {
+            while (p < r) *q++ = *p++; 
+        }
+
+        while ((*q++ = *p++) != '\0') continue;
+    }
+
+    //return 0;
+}
+
+
+
+/* Vertex Buffer Size */
+uint32_t VBOSize;
+
+//Vertex Buffer Object (VBO)
+vertex_t *Vertex;
+/*---------------*/
+
+
+#include <stdlib.h>
+
+/* OBJ Format Interpreter */
+void OBJInterpreter(char *lstring) //Line String
+{   
+    //Buffer String
+    char* bstring;
+
+    //Detect Comment In The Line
+    bstring = strchr(lstring, '#');
+    //Removes The Comment From The Line
+    strremove(lstring, bstring);
+    
+    /* Mesh Detection */
+    //Detect The Character 'o' in a line wich means object name
+    if ((bstring = strchr(lstring, 'o')) != NULL)
+    {
+        //Removes 'o ' from the line
+        strremove(lstring, "o ");
+        
+        //Heap Arrays Start at arr[1] rather than arr[0]
+        Scene.MeshCount++;
+
+        /* Reallocate Mesh[] */
+        Scene.Mesh = (mesh_t*)realloc(Scene.Mesh, (Scene.MeshCount + 1) * sizeof(mesh_t)); //Dont Forget to free()
+        //When Scene.Mesh is Reallocated, Triangle Will Contain Garbage, Wich will make realloc() crash on it... Fixed
+        Scene.Mesh[Scene.MeshCount].Name = nullptr;
+        Scene.Mesh[Scene.MeshCount].Triangle = nullptr;
+        Scene.Mesh[Scene.MeshCount].FaceCount = NULL;
+
+        //We Update the name of the mesh
+        Scene.Mesh[Scene.MeshCount].Name = lstring;
+    }
+
+    /* Vertex Loader */
+    //Detect The Character 'v' in a line wich means vertex
+    if ((bstring = strchr(lstring, 'v')) != NULL)
+    {
+        //Removes 'v ' from the line
+        strremove(lstring, "v ");
+        
+        /* Separates each value using the space between them as reference I.E.: "-1.000000 " for X, and so on*/
+        //We Iterate 3 Times for X, Y, and Z
+        bstring = strtok(lstring, " ");
+        float X = atof(bstring);
+        
+        bstring = strtok(NULL, " ");
+        float Y = atof(bstring);
+        
+        bstring = strtok(NULL, "\0");
+        float Z = atof(bstring);
+
+        /*//Debug
+        printf(ToString(X));
+        printf(ToString(Y));
+        printf(ToString(Z));*/
+
+        //Heap Arrays Start at arr[1] rather than arr[0]
+        VBOSize++;
+
+        /* Reallocate VBO */
+        Vertex = (vertex_t*)realloc(Vertex, (VBOSize + 1) * sizeof(vertex_t));
+
+        /* We Update The Vertex Struct */
+        Vertex[VBOSize].x = X;
+        Vertex[VBOSize].y = Y;
+        Vertex[VBOSize].z = (unsigned int)Z;
+    }
+
+    //Detect Smooth Shading Flag In The Line
+    bstring = strchr(lstring, 's');
+    //Removes The Flag Altogheter (Does The PS2 Support Smooth Shading?)
+    strremove(lstring, bstring);
+
+    /* Face Interpreter */
+    if ((bstring = strchr(lstring, 'f')) != NULL)
+    {
+        //Removes 'f ' from the line
+        strremove(lstring, "f ");
+        
+        /* Separates each value using the space between them as reference */
+        //We Iterate 3 Times for V0, V1, and V2
+        bstring = strtok(lstring, " ");
+        uint32_t V0 = atoi(bstring);
+        
+        bstring = strtok(NULL, " ");
+        uint32_t V1 = atoi(bstring);
+
+        bstring = strtok(NULL, "\0");
+        uint32_t V2 = atoi(bstring);
+
+        //Debug
+        printf(ToString((int)V0));
+        printf(ToString((int)V1));
+        printf(ToString((int)V2));
+
+        //Heap Arrays Start at arr[1] rather than arr[0]
+        Scene.Mesh[Scene.MeshCount].FaceCount++;
+
+        /* Reallocate Triangle[] */
+        Scene.Mesh[Scene.MeshCount].Triangle = (triangle_t*)realloc(Scene.Mesh[Scene.MeshCount].Triangle, (Scene.Mesh[Scene.MeshCount].FaceCount + 1) * sizeof(triangle_t)); //Dont Forget to free()
+
+        //Debug
+        printf(ToString(Scene.Mesh[Scene.MeshCount].FaceCount));
+
+        /* We Update The Triangle Struct */
+        Scene.Mesh[Scene.MeshCount].Triangle[Scene.Mesh[Scene.MeshCount].FaceCount].v0 = Vertex[V0];
+        Scene.Mesh[Scene.MeshCount].Triangle[Scene.Mesh[Scene.MeshCount].FaceCount].v1 = Vertex[V1];
+        Scene.Mesh[Scene.MeshCount].Triangle[Scene.Mesh[Scene.MeshCount].FaceCount].v2 = Vertex[V2];
+
+        //Debug
+        /*printf(ToString(Vertex[V0].x));
+        printf(ToString(Vertex[V0].y));
+        printf(ToString(Vertex[V0].z));
+        printf(ToString(Vertex[V1].x));
+        printf(ToString(Vertex[V1].y));
+        printf(ToString(Vertex[V1].z));
+        printf(ToString(Vertex[V2].x));
+        printf(ToString(Vertex[V2].y));
+        printf(ToString(Vertex[V2].z));*/
+        
+
+        //Debug
+        int F = Scene.Mesh[Scene.MeshCount].FaceCount;
+        printf(ToString(Scene.Mesh[Scene.MeshCount].Triangle[F].v0.x));
+        printf(ToString(Scene.Mesh[Scene.MeshCount].Triangle[F].v0.y));
+        printf(ToString(Scene.Mesh[Scene.MeshCount].Triangle[F].v0.z));
+        printf(ToString(Scene.Mesh[Scene.MeshCount].Triangle[F].v1.x));
+        printf(ToString(Scene.Mesh[Scene.MeshCount].Triangle[F].v1.y));
+        printf(ToString(Scene.Mesh[Scene.MeshCount].Triangle[F].v1.z));
+        printf(ToString(Scene.Mesh[Scene.MeshCount].Triangle[F].v2.x));
+        printf(ToString(Scene.Mesh[Scene.MeshCount].Triangle[F].v2.y));
+        printf(ToString(Scene.Mesh[Scene.MeshCount].Triangle[F].v2.z));
+
+    }
+
+
+
+    printf("\n");
+}
+
+/* OBJ Loader */
+void OBJ(const char *fpath)
+{
+    char *fstring = File(fpath);
+    
+    /* Allocate VBO */
+    //Vertex = (vertex_t*)malloc(sizeof(vertex_t));
+
+    //We Iterate line by line
+    char *line;
+    while(fstring)
+    {
+        char * nextLine = strchr(fstring, '\n');
+        if (nextLine) *nextLine = '\0';  // temporarily terminate the current line
+
+        //printf("curLine=[%s]\n", fstring);
+        OBJInterpreter(fstring);
+
+        if (nextLine) *nextLine = '\n';  // then restore newline-char, just to be tidy    
+        fstring = nextLine ? (nextLine+1) : NULL;
+    }
+
+    //Don't forget eh!
+    free(fstring); //File Buffer
+    free(Vertex); //VBO Array
+    //fstring = nullptr;
+}
+
+}
+#endif
