@@ -50,8 +50,8 @@ void render(framebuffer_t *frame, zbuffer_t *z)
 
 	MATRIX view_screen;
 
-	packets[0] = packet_init(40000, PACKET_NORMAL);
-	packets[1] = packet_init(40000, PACKET_NORMAL);
+	packets[0] = packet_init(500000, PACKET_NORMAL);
+	packets[1] = packet_init(500000, PACKET_NORMAL);
 
 	// Uncached accelerated
 	flip_pkt = packet_init(3,PACKET_UCAB);
@@ -65,7 +65,7 @@ void render(framebuffer_t *frame, zbuffer_t *z)
 	prim.mapping_type = DRAW_DISABLE;
 	prim.fogging = DRAW_DISABLE;
 	prim.blending = DRAW_ENABLE;
-	prim.antialiasing = DRAW_DISABLE;
+	prim.antialiasing = DRAW_ENABLE;
 	prim.colorfix = PRIM_FIXED;
 
 	color.r = 0x80;
@@ -116,12 +116,14 @@ void render(framebuffer_t *frame, zbuffer_t *z)
 		//Render Stuff
 		static float Yaw;
 		static float Pitch;
-		Yaw -= float(IO::buttons.rjoy_h - 127) / 127 * 0.005f; //Rotate Stuff
-		Pitch -= float(IO::buttons.rjoy_v - 127) / 127 * 0.005f; //Rotate Stuff
+		Yaw -= float(IO::buttons.rjoy_h - 127) / 127 * 0.01f; //Rotate Stuff
+		Pitch -= float(IO::buttons.rjoy_v - 127) / 127 * 0.01f; //Rotate Stuff
 
 		VECTOR RotationInput;
 		RotationInput[0] = Pitch;
 		RotationInput[1] = Yaw;
+		
+		//vector_copy(Draw::camera_rotation, RotationInput);
 
 		//VECTOR LookingAt;
 		//LookingAt[0] = cos(Yaw) * cos(Pitch);
@@ -136,18 +138,34 @@ void render(framebuffer_t *frame, zbuffer_t *z)
 
 		static float MoveX;
 		static float MoveY;
-		MoveX += float(IO::buttons.ljoy_h - 127) / 127 * 0.05f; //Rotate Stuff
-		MoveY += float(IO::buttons.ljoy_v - 127) / 127 * 0.05f; //Rotate Stuff
+		MoveX = float(IO::buttons.ljoy_h - 127) / 127.0f * 0.1f; //Rotate Stuff
+		MoveY = float(IO::buttons.ljoy_v - 127) / 127.0f * 0.1f; //Rotate Stuff
 
-		
-		VECTOR MovementInput;
-		MovementInput[0] = (MoveX * Draw::camera_normal[2]); //Rotate Stuff
-		MovementInput[1] = 0;
-		MovementInput[2] = (MoveX * Draw::camera_normal[0]); //Rotate Stuff
-
-	
-		vector_copy(Draw::camera_position, MovementInput);
+		//vector_copy(Draw::camera_position, MovementInput);
 		vector_copy(Draw::camera_rotation, RotationInput);
+
+		VECTOR CameraFront;
+		CameraFront[2] = cos(Yaw) ;
+        CameraFront[1] = -sin(Pitch);
+        CameraFront[0] = sin(Yaw) ;
+		vector_normalize(CameraFront, CameraFront);
+
+		VECTOR CameraRight;
+		CameraRight[2] = -sin(Yaw) * cos(Pitch) ;
+        CameraRight[1] = sin(Pitch);
+        CameraRight[0] = cos(Yaw) * cos(Pitch);
+		vector_normalize(CameraRight, CameraRight);
+
+		VECTOR CameraPosition;
+		Draw::camera_position[0] += CameraFront[0] * MoveY + CameraRight[0] * MoveX;
+		Draw::camera_position[1] += CameraFront[1] * MoveY + CameraRight[1] * MoveX;
+		Draw::camera_position[2] += CameraFront[2] * MoveY + CameraRight[2] * MoveX;
+
+		vector_copy(Draw::light_direction[1], CameraFront);
+
+		//vector_normalize(CameraLookAt, CameraLookAt);
+
+		//vector_add(Draw::camera_position, Draw::camera_position, CameraLookAt);
 	
 
 		//vector_copy(Draw::camera_position, MovementInput);
@@ -229,12 +247,11 @@ void render(framebuffer_t *frame, zbuffer_t *z)
         }
 		
 
-		VECTOR object_position = { 0.00f, 0.00f, -5.00f, 1.00f };
+		VECTOR object_position = { 0.00f, 0.00f, 0.00f, 1.00f };
 		VECTOR object_rotation = { 0.0f, 0.0f, 0.0f, 1.00f };
 
 		if (IO::new_pad & PAD_LEFT) a ^= 1;
-		if (a) q = Draw::teapot(q, view_screen, object_position, object_rotation, &prim, &color, frame, z);
-		
+		if (a) q = Draw::Model(q, view_screen, object_position, object_rotation, &prim, &color, frame, z);
 
 
 		dmatag = q;
@@ -270,7 +287,7 @@ void render(framebuffer_t *frame, zbuffer_t *z)
 
 int main(int argc, char *argv[])
 {
-	Load::OBJ("CUBE.OBJ");
+	Load::OBJ("MONKEY.OBJ");
 	printf("Finished Loading\n");
 
 	// The buffers to be used.

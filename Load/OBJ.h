@@ -148,7 +148,7 @@ void OBJInterpreter(char *lstring) //Line String
 
     //Detect Smooth Shading Flag In The Line
     bstring = strchr(lstring, 's');
-    //Removes The Flag Altogheter (Does The PS2 Support Smooth Shading?)
+    //Removes The Flag Altogheter (Does The PS2 Support Smooth Shading?) IT DOES, I UPDATE IT LATER
     strremove(lstring, bstring);
 
     /* Face Interpreter */

@@ -65,8 +65,8 @@ void init_gs(framebuffer_t *frame, zbuffer_t *z)
 {
 
 	// Define a 32-bit 640x512 framebuffer.
-	frame->width = 640;
-	frame->height = 512;
+	frame->width = 1920; //640
+	frame->height = 1080; //512
 	frame->mask = 0;
 	frame->psm = GS_PSM_32;
 
@@ -75,8 +75,8 @@ void init_gs(framebuffer_t *frame, zbuffer_t *z)
 
 	frame++;
 
-	frame->width = 640;
-	frame->height = 512;
+	frame->width = 1920;
+	frame->height = 1080;
 	frame->mask = 0;
 	frame->psm = GS_PSM_32;
 
@@ -100,8 +100,8 @@ void init_gs(framebuffer_t *frame, zbuffer_t *z)
 namespace Draw
 {
 
-VECTOR camera_position = { 0.00f, 0.00f,  0.00f, 1.00f } ;
-VECTOR camera_rotation = { 0.00f, 0.00f,   0.00f, 1.00f };
+VECTOR camera_position = { 0.00f, 1.00f,  5.00f, 1.00f };
+VECTOR camera_rotation = { 0.00f, 0.00f,  0.00f, 1.00f };
 
 //Camera Forward Vector
 VECTOR camera_normal;
@@ -116,26 +116,26 @@ color_t *rgbaq;
 
 int light_count = 2;
 
-VECTOR light_direction[4] = 
+VECTOR light_direction[2] = 
 {
 	{  1.00f,  0.00f,  0.00f, 1.00f },
 	{  1.00f,  0.00f,  0.00f, 1.00f }
 };
 
-VECTOR light_colour[4] = 
+VECTOR light_colour[2] = 
 {
-	{ 0.40f, 0.40f, 0.40f, 1.00f },
+	{ 0.50f, 0.50f, 0.50f, 1.00f },
 	{ 1.00f, 1.00f, 1.00f, 1.00f }
 };
 
-int light_type[4] = 
+int light_type[2] = 
 {
 	LIGHT_AMBIENT,
 	LIGHT_DIRECTIONAL
 };
 	
 
-qword_t *teapot(qword_t *q, MATRIX view_screen, VECTOR object_position, VECTOR object_rotation, prim_t *prim, color_t *color, framebuffer_t *frame, zbuffer_t *z)
+qword_t *Model(qword_t *q, MATRIX view_screen, VECTOR object_position, VECTOR object_rotation, prim_t *prim, color_t *color, framebuffer_t *frame, zbuffer_t *z)
 {
 
 	int i;
@@ -172,16 +172,9 @@ qword_t *teapot(qword_t *q, MATRIX view_screen, VECTOR object_position, VECTOR o
 	Direction[1] = world_view[9];
 	Direction[2] = world_view[10];
 	Direction[3] = world_view[11];
-	vector_copy(camera_normal, Direction);
+	vector_normalize(camera_normal, Direction);
 
-	printf("Coord x%f\n", camera_position[0]);
-	printf("Coord y%f\n", camera_position[1]);
-	printf("Coord z%f\n", camera_position[2]);
 
-	printf("World View x%f\n", world_view[8]);
-	printf("World View y%f\n", world_view[9]);
-	printf("World View z%f\n", world_view[10]);
-	printf("World Vieww%f\n", world_view[11]);
 
 	
 	/*printf("nx%f\n", camera_normal[0]);
