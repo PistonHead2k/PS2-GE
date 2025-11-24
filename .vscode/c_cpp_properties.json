@@ -4,7 +4,7 @@
             "name": "Win32",
             "includePath": [
                 "${workspaceFolder}/**",
-                "${PS2SDK}/**"
+                "C:\\ps2dev\\**"
             ],
             "defines": [
                 "_DEBUG",

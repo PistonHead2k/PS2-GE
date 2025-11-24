@@ -100,7 +100,7 @@ void init_gs(framebuffer_t *frame, zbuffer_t *z)
 namespace Draw
 {
 
-VECTOR camera_position = { 0.00f, 0.00f, 5.00f, 1.00f };
+VECTOR camera_position = { 0.00f, 0.00f,  0.00f, 1.00f } ;
 VECTOR camera_rotation = { 0.00f, 0.00f,   0.00f, 1.00f };
 
 //Camera Forward Vector
@@ -152,6 +152,9 @@ qword_t *teapot(qword_t *q, MATRIX view_screen, VECTOR object_position, VECTOR o
 	dmatag = q;
 	q++;
 
+
+
+
 	// Create the local_world matrix.
 	create_local_world(local_world, object_position, object_rotation);
 
@@ -169,18 +172,22 @@ qword_t *teapot(qword_t *q, MATRIX view_screen, VECTOR object_position, VECTOR o
 	Direction[1] = world_view[9];
 	Direction[2] = world_view[10];
 	Direction[3] = world_view[11];
-	vector_normalize(camera_normal, Direction);
+	vector_copy(camera_normal, Direction);
 
-	printf("x%f\n", world_view[8]);
-	printf("y%f\n", world_view[9]);
-	printf("z%f\n", world_view[10]);
-	printf("w%f\n", world_view[11]);
+	printf("Coord x%f\n", camera_position[0]);
+	printf("Coord y%f\n", camera_position[1]);
+	printf("Coord z%f\n", camera_position[2]);
+
+	printf("World View x%f\n", world_view[8]);
+	printf("World View y%f\n", world_view[9]);
+	printf("World View z%f\n", world_view[10]);
+	printf("World Vieww%f\n", world_view[11]);
 
 	
-	printf("nx%f\n", camera_normal[0]);
+	/*printf("nx%f\n", camera_normal[0]);
 	printf("ny%f\n", camera_normal[1]);
 	printf("nz%f\n", camera_normal[2]);
-	printf("nw%f\n", camera_normal[3]);
+	printf("nw%f\n", camera_normal[3]);*/
 
 	using namespace Load;
 	uint16_t vertex_count = Scene.Mesh[Scene.MeshCount].VertexCount;

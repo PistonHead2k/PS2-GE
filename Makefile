@@ -6,7 +6,7 @@ EE_OBJS=main.o
 
 EE_LIBS= -ldma -lgraph -ldraw -lmath3d -lpacket -lkernel -ldebug -linput -lpad
 
-EE_CFLAGS += --std=c99 -Wno-unused-variable
+EE_CFLAGS += --std=c23 -Wno-unused-variable
 EE_LDFLAGS = -L$(PSDSDK)/ee/common/lib -L$(PS2SDK)/ee/lib
 
 EE_OPTFLAGS= -O2

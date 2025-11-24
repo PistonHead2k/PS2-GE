@@ -21,6 +21,15 @@ PS2 Game Engine
 ## PS2-GE
 Game Engine for the PS2, currently doing a demo game to test its functionality
 
+## Current Status
+
+- [x] Pushing Cube to GS
+- [x] Input Handler
+- [ ] LookAt Transformation
+- [ ] True Asset Importer
+- [ ] Texturing
+- [ ] Using Vector Units for Linear Transformations
+
 ## Documentation
 -
 

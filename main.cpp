@@ -22,8 +22,13 @@
 //Joystick
 #include "Pad.h"
 
+#include "cmath.h"
 
+		VECTOR CameraPosition = { 0.00f, 0.00f,  5.00f, 1.00f };
+		//Camera Front Vector
+    	VECTOR CameraFront = {0.0f, 0.0f, -1.0f, 1.0f};
 
+		bool a = 1;
 void render(framebuffer_t *frame, zbuffer_t *z)
 {
 	//Init Pad
@@ -51,8 +56,7 @@ void render(framebuffer_t *frame, zbuffer_t *z)
 	// Uncached accelerated
 	flip_pkt = packet_init(3,PACKET_UCAB);
 
-	VECTOR object_position = { 0.00f, 0.00f, 0.00f, 1.00f };
-	VECTOR object_rotation = { 0.0f, 0.0f, 0.0f, 1.00f };
+
 
 	// Define the triangle primitive we want to use.
 	prim.type = PRIM_TRIANGLE;
@@ -110,29 +114,97 @@ void render(framebuffer_t *frame, zbuffer_t *z)
 		DMATAG_CNT(dmatag,q-dmatag - 1,0,0,0);
 
 		//Render Stuff
+		static float Yaw;
+		static float Pitch;
+		Yaw -= float(IO::buttons.rjoy_h - 127) / 127 * 0.005f; //Rotate Stuff
+		Pitch -= float(IO::buttons.rjoy_v - 127) / 127 * 0.005f; //Rotate Stuff
+
+		VECTOR RotationInput;
+		RotationInput[0] = Pitch;
+		RotationInput[1] = Yaw;
+
+		//VECTOR LookingAt;
+		//LookingAt[0] = cos(Yaw) * cos(Pitch);
+       	//LookingAt[1] = sin(Pitch);
+       	//LookingAt[2] = sin(Yaw) * cos(Pitch);
+
+		//vector_normalize(LookingAt, LookingAt);
+
+		
+		printf("cos yawx%f\n", sin(Pitch));
+		printf("cos yawx%f\n", Draw::camera_normal[2]);
+
+		static float MoveX;
+		static float MoveY;
+		MoveX += float(IO::buttons.ljoy_h - 127) / 127 * 0.05f; //Rotate Stuff
+		MoveY += float(IO::buttons.ljoy_v - 127) / 127 * 0.05f; //Rotate Stuff
+
+		
+		VECTOR MovementInput;
+		MovementInput[0] = (MoveX * Draw::camera_normal[2]); //Rotate Stuff
+		MovementInput[1] = 0;
+		MovementInput[2] = (MoveX * Draw::camera_normal[0]); //Rotate Stuff
+
+	
+		vector_copy(Draw::camera_position, MovementInput);
+		vector_copy(Draw::camera_rotation, RotationInput);
+	
+
+		//vector_copy(Draw::camera_position, MovementInput);
+
+		//vector_multiply(Draw::camera_position, Draw::camera_position, LookingAt);
 
 
 		//Draw::camera_position[0] += float(IO::buttons.ljoy_h - 127) / 127 * 0.05f;
 		//Draw::camera_position[2] += float(IO::buttons.ljoy_v - 127) / 127 * 0.05f; 
 
-		Draw::camera_rotation[1] -= float(IO::buttons.rjoy_h - 127) / 127 * 0.005f; //Rotate Stuff
-		Draw::camera_rotation[0] -= float(IO::buttons.rjoy_v - 127) / 127 * 0.005f; //Rotate Stuff
+		/*float MovementX = float(IO::buttons.ljoy_v - 127) / 127 * 0.05f;
+		float MovementY = -float(IO::buttons.ljoy_h - 127) / 127 * 0.05f; 
+		
+		static float Yaw;
+		static float Pitch;
+		Yaw -= float(IO::buttons.rjoy_h - 127) / 127 * 0.05f; //Rotate Stuff
+		Pitch -= float(IO::buttons.rjoy_v - 127) / 127 * 0.05f; //Rotate Stuff
 
+		printf("CameraRotation x%f\n", 	Draw::camera_rotation[0]);
+		printf("CameraRotation y%f\n",	Draw::camera_rotation[1]);
 
-		VECTOR CameraForwardMovement;
+		VECTOR VecMovemenX, VecMovementY;
+		VecMovemenX[0] = MovementX;
+		VecMovemenX[1] = MovementX;
+		VecMovemenX[2] = MovementX;
+		VecMovemenX[3] = 1.0f;
+
+		CameraFront[0] = cos(Yaw) * cos(Pitch);
+        CameraFront[1] = sin(Pitch);
+        CameraFront[2] = sin(Yaw) * cos(Pitch);
+
+		vector_normalize(CameraFront, CameraFront);
+
+		VECTOR buf;
+		vector_multiply(buf, VecMovemenX, CameraFront );
+		vector_add(Draw::camera_position, Draw::camera_position, buf);
+		
+		VECTOR CameraUp = {0.0f, 1.0f, 0.0f, 1.0f};
+		vector_cross_product(buf, CameraFront, CameraUp);
+		vector_multiply(buf, buf, VecMovementY);
+		vector_normalize(buf, buf);
+		vector_add(Draw::camera_position, Draw::camera_position, buf);
+
+		vector_copy(Draw::camera_normal, CameraFront);*/
+
+		/*VECTOR CameraForwardMovement;
 		float x = float(IO::buttons.ljoy_v - 127) / 127 * 0.005f; //Rotate Stuff
 		CameraForwardMovement[0] = x;
 		CameraForwardMovement[1] = x;
 		CameraForwardMovement[2] = x;
 
 		VECTOR CameraPositionOut;
-		int i = 1;
-		i++;
 		vector_multiply(CameraPositionOut, CameraForwardMovement, Draw::camera_normal);
 		
-		static VECTOR CameraPosition;
+
 		vector_add(CameraPosition, CameraPosition, CameraPositionOut);
-		vector_copy(Draw::camera_position, CameraPosition);
+		vector_copy(Draw::camera_position, CameraPosition);*/
 		
 
 		//VECTOR Input;
@@ -157,7 +229,11 @@ void render(framebuffer_t *frame, zbuffer_t *z)
         }
 		
 
-		q = Draw::teapot(q, view_screen, object_position, object_rotation, &prim, &color, frame, z);
+		VECTOR object_position = { 0.00f, 0.00f, -5.00f, 1.00f };
+		VECTOR object_rotation = { 0.0f, 0.0f, 0.0f, 1.00f };
+
+		if (IO::new_pad & PAD_LEFT) a ^= 1;
+		if (a) q = Draw::teapot(q, view_screen, object_position, object_rotation, &prim, &color, frame, z);
 		
 
 
