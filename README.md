@@ -26,5 +26,14 @@ Game Engine for the PS2, currently doing a demo game to test its functionality
 
 ## How to play
 Real PS2: Download the release ISO, burn it on a disc, and you can use FreeMCBoot to load it.
+
+
 PC: Download PCSX2 or any other PS2 emulator and load the iso.
+
+## For Devs
+VSCode: I use the linux subsystem with gcc to compile (Make sure to have ps2dev library)
+PCSX2: Make sure to add it to the Path enviroment variable, press F5 in vscode to have it run.
+
+## Dependencys:
+PS2SDK - PS2DEV - Makefile - Linux Subsystem or Bash
 
