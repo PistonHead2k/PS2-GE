@@ -1,0 +1,9 @@
+To install VCL, simply copy the executable file into your path ;
+
+e.g /usr/local/bin
+
+If you are going to use gasp or gcc with vcl, make sure that they 
+are installed and in your path.  Under win32, you will need a
+package like cygwin (downloadable freely from the internet) to
+use them, as they are not provided as part of the OS nor as part
+of this package.
