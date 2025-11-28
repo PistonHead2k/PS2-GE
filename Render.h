@@ -45,6 +45,8 @@ namespace Path3
 
 #include "LookAt.h"
 
+#include "Debug.h"
+
 void flip_buffers(packet_t *flip,framebuffer_t *frame)
 {
 
@@ -187,19 +189,15 @@ qword_t *Model(qword_t *q, MATRIX view_screen, VECTOR object_position, VECTOR ob
 	create_local_screen(local_screen, local_world, world_view, view_screen);
 
 	VECTOR Direction;
-	Direction[0] = world_view[8];
-	Direction[1] = world_view[9];
+	Direction[0] = -world_view[8];
+	Direction[1] = -world_view[9]; //negative because the pitch is inverted relative to movement (inverted vertical diagonal)
 	Direction[2] = world_view[10];
-	Direction[3] = world_view[11];
+	//Direction[3] = world_view[11];
 	vector_normalize(camera_normal, Direction);
 
-
-
-	
-	/*printf("nx%f\n", camera_normal[0]);
-	printf("ny%f\n", camera_normal[1]);
-	printf("nz%f\n", camera_normal[2]);
-	printf("nw%f\n", camera_normal[3]);*/
+	#if defined(DEBUG)
+		Debug::pVector("camera normal", Direction);
+	#endif
 
 	using namespace Load;
 	uint16_t vertex_count = Scene.Mesh[Scene.MeshCount].VertexCount;
@@ -354,22 +352,14 @@ void render(framebuffer_t *frame, zbuffer_t *z)
 		Yaw -= float(IO::buttons.rjoy_h - 127) / 127 * 0.01f; //Rotate Stuff
 		Pitch -= float(IO::buttons.rjoy_v - 127) / 127 * 0.01f; //Rotate Stuff
 
-		VECTOR RotationInput;
-		RotationInput[0] = Pitch;
-		RotationInput[1] = Yaw;
-		
-
-		
-		printf("cos yawx%f\n", fastsin(Pitch));
-		printf("cos yawx%f\n", camera_normal[2]);
+		//Apply Rotation
+		camera_rotation[0] = Pitch;
+		camera_rotation[1] = Yaw;
 
 		static float MoveX;
 		static float MoveY;
 		MoveX = -float(IO::buttons.ljoy_h - 127) / 127.0f * 0.1f; //Rotate Stuff
 		MoveY = float(IO::buttons.ljoy_v - 127) / 127.0f * 0.1f; //Rotate Stuff
-
-		//vector_copy(Draw::camera_position, MovementInput);
-		vector_copy(camera_rotation, RotationInput);
 
 		VECTOR CameraFront;
 		CameraFront[3] = 0.0f;
@@ -377,6 +367,12 @@ void render(framebuffer_t *frame, zbuffer_t *z)
         CameraFront[1] = -fastsin(Pitch); //negative because the pitch is inverted relative to movement (inverted vertical diagonal)
         CameraFront[0] = fastsin(Yaw) * fastcos(Pitch);
 		vector_normalize(CameraFront, CameraFront);
+	
+		#if defined(DEBUG)
+			Debug::pVector("camera front", CameraFront, X|Y|Z);
+		#endif
+
+		vector_copy(CameraFront, camera_normal);
 
 		VECTOR WorldUp = { 0.0f, 1.0f, 0.0f, 0.0f};
 		VECTOR CameraRight;

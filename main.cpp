@@ -1,5 +1,8 @@
 //Main Script by PistonHead2k
 
+/* Debug Info in Console */
+//#define DEBUG
+
 #include <kernel.h>
 #include <stdlib.h>
 #include <malloc.h>
@@ -23,7 +26,6 @@
 #include "Pad.h"
 
 #include "cmath.h"
-
 
 int main(int argc, char *argv[])
 {
