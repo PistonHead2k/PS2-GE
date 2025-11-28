@@ -3,8 +3,10 @@
 
 EE_BIN=ELF-ISO/test.elf #linkable file
 EE_OBJS=main.o #linker
-
 EE_LIBS= -ldma -lgraph -ldraw -lmath3d -lpacket -lkernel -ldebug -linput -lpad
+
+EE_DVP = dvp-as
+EE_VCL = vcl
 
 EE_CFLAGS += --std=c23 -Wno-unused-variable
 EE_LDFLAGS = -L$(PSDSDK)/ee/common/lib -L$(PS2SDK)/ee/lib
@@ -32,3 +34,16 @@ rmiso:
 #Update ISO
 u:
 	$(MAKE) clean; $(MAKE) all
+
+#Make c array from raw file
+raw:
+	bin2c texture.raw texture.c texture
+
+# Original VCL tool preferred. 
+# It can be runned on WSL, but with some tricky commands: 
+# https://github.com/microsoft/wsl/issues/2468#issuecomment-374904520
+%.vsm: %.vcl
+	$(EE_VCL) $< >> $@
+
+%.o: %.vsm
+	$(EE_DVP) $< -o $@

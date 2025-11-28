@@ -1,7 +1,7 @@
 //Main Script by PistonHead2k
 
 /* Debug Info in Console */
-//#define DEBUG
+#define DEBUG
 
 #include <kernel.h>
 #include <stdlib.h>
@@ -19,13 +19,15 @@
 
 #include <stdio.h>
 
-#include "Render.h"
+#include "Render/Path3.h"
+#include "Render/Path1.h"
+
 #include "Load/OBJ.h"
 
 //Joystick
 #include "Pad.h"
 
-#include "cmath.h"
+#include "Def/cmath.h"
 
 int main(int argc, char *argv[])
 {
