@@ -17,6 +17,7 @@
 #include <stdio.h>
 
 #include "Render.h"
+#include "Load/OBJ.h"
 
 //Joystick
 #include "Pad.h"

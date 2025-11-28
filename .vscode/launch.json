@@ -8,7 +8,7 @@
             "name": "Run PCSX2",
             "type": "PowerShell",
             "request": "launch",
-            "script": "pcsx2 iso/build.iso --nogui --console",
+            "script": "pcsx2 elf-iso/build.iso --nogui --console",
             "args": []
         }
     ]

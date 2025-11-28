@@ -89,8 +89,8 @@ void init_gs(framebuffer_t *frame, zbuffer_t *z)
 {
 
 	// Define a 32-bit 640x512 framebuffer.
-	frame->width = 1920; //640
-	frame->height = 1080; //512
+	frame->width = 640; //640
+	frame->height = 512; //512
 	frame->mask = 0;
 	frame->psm = GS_PSM_32;
 
@@ -99,8 +99,8 @@ void init_gs(framebuffer_t *frame, zbuffer_t *z)
 
 	frame++;
 
-	frame->width = 1920;
-	frame->height = 1080;
+	frame->width = 640;
+	frame->height = 512;
 	frame->mask = 0;
 	frame->psm = GS_PSM_32;
 
@@ -285,8 +285,8 @@ void render(framebuffer_t *frame, zbuffer_t *z)
 
 	MATRIX view_screen;
 
-	packets[0] = packet_init(500000, PACKET_NORMAL);
-	packets[1] = packet_init(500000, PACKET_NORMAL);
+	packets[0] = packet_init(5000, PACKET_NORMAL);
+	packets[1] = packet_init(5000, PACKET_NORMAL);
 
 	// Uncached accelerated
 	flip_pkt = packet_init(3,PACKET_UCAB);
@@ -358,40 +358,32 @@ void render(framebuffer_t *frame, zbuffer_t *z)
 		RotationInput[0] = Pitch;
 		RotationInput[1] = Yaw;
 		
-		//vector_copy(Draw::camera_rotation, RotationInput);
-
-		//VECTOR LookingAt;
-		//LookingAt[0] = cos(Yaw) * cos(Pitch);
-       	//LookingAt[1] = sin(Pitch);
-       	//LookingAt[2] = sin(Yaw) * cos(Pitch);
-
-		//vector_normalize(LookingAt, LookingAt);
 
 		
-		printf("cos yawx%f\n", sin(Pitch));
+		printf("cos yawx%f\n", fastsin(Pitch));
 		printf("cos yawx%f\n", camera_normal[2]);
 
 		static float MoveX;
 		static float MoveY;
-		MoveX = float(IO::buttons.ljoy_h - 127) / 127.0f * 0.1f; //Rotate Stuff
+		MoveX = -float(IO::buttons.ljoy_h - 127) / 127.0f * 0.1f; //Rotate Stuff
 		MoveY = float(IO::buttons.ljoy_v - 127) / 127.0f * 0.1f; //Rotate Stuff
 
 		//vector_copy(Draw::camera_position, MovementInput);
 		vector_copy(camera_rotation, RotationInput);
 
 		VECTOR CameraFront;
-		CameraFront[2] = cos(Yaw) ;
-        CameraFront[1] = -sin(Pitch);
-        CameraFront[0] = sin(Yaw) ;
+		CameraFront[3] = 0.0f;
+		CameraFront[2] = fastcos(Yaw) * fastcos(Pitch);
+        CameraFront[1] = -fastsin(Pitch); //negative because the pitch is inverted relative to movement (inverted vertical diagonal)
+        CameraFront[0] = fastsin(Yaw) * fastcos(Pitch);
 		vector_normalize(CameraFront, CameraFront);
 
+		VECTOR WorldUp = { 0.0f, 1.0f, 0.0f, 0.0f};
 		VECTOR CameraRight;
-		CameraRight[2] = -sin(Yaw) * cos(Pitch) ;
-        CameraRight[1] = sin(Pitch);
-        CameraRight[0] = cos(Yaw) * cos(Pitch);
+		vector_cross_product(CameraRight, CameraFront, WorldUp);
 		vector_normalize(CameraRight, CameraRight);
 
-		VECTOR CameraPosition;
+
 		camera_position[0] += CameraFront[0] * MoveY + CameraRight[0] * MoveX;
 		camera_position[1] += CameraFront[1] * MoveY + CameraRight[1] * MoveX;
 		camera_position[2] += CameraFront[2] * MoveY + CameraRight[2] * MoveX;

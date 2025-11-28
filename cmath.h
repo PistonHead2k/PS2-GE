@@ -2,56 +2,52 @@
 #define mathc
 
 //The Good Ol Pi
-#define PI 3.14159
+#define PI 3.14159265358979323846f
 //Taylor Series Terms
 #define TERMS 7
 
-float pow(float base, int exp) {
-    if(exp < 0) {
-        if(base == 0)
-            return -0; // Error!!
-        return 1 / (base * pow(base, (-exp) - 1));
-    }
-    if(exp == 0)
-        return 1;
-    if(exp == 1)
-        return base;
-    return base * pow(base, exp - 1);
+/* Fast Abs */
+inline float fabsf(float x) {
+    const uint32_t mask = 0x7FFFFFFF;
+    uint32_t bits = (*(uint32_t*)&x) & mask;
+    return *(float*)&bits;
 }
 
-int fact(int n) 
+/* Fast Mod */
+inline float fmodf(float x, float m) 
 {
-    return n <= 0 ? 1 : n * fact(n-1);
+    return x - (int)(x / m) * m;
 }
 
-float sin(float deg)
+inline float fastsin(float x) {
+    // wrap to [-PI, PI]
+    x = fmodf(x + PI, 2*PI) - PI;
+
+    const float B = 4.0f / PI;
+    const float C = -4.0f / (PI * PI);
+
+    float y = B * x + C * x * fabsf(x);
+
+    // optional correction
+    const float P = 0.225f;
+    y = P * (y * fabsf(y) - y) + y;
+
+    return y;
+}
+
+inline float fastcos(float x)
 {
-    //deg %= 360; // make it less than 360
-    float rad = deg * PI / 180;
-
-    rad = deg;
-
-    float sine = 0;
-
-    int i;
-    for(i = 0; i < TERMS; i++) { // That's Taylor series!!
-        sine += pow(-1, i) * pow(rad, 2 * i + 1) / fact(2 * i + 1);
-    }
-    return sine;
+    /* cos is sin shifted 90 deg */
+    return fastsin(x + PI * 0.5f);
 }
 
-float cos(float deg) {
-    //deg %= 360; // make it less than 360
-    float rad = deg * PI / 180;
+inline float fastdeg2rad(float degrees)
+{
+    return degrees * (PI / 180.0f);
+}
 
-    rad = deg;
-
-    float cosine = 0;
-
-    int i;
-    for(i = 0; i < TERMS; i++) { // That's also Taylor series!!
-        cosine += pow(-1, i) * pow(rad, 2 * i) / fact(2 * i);
-    }
-    return cosine;
+inline float fastrad2deg(float radians)
+{
+    return radians * (180.0f / PI);
 }
 #endif

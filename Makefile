@@ -1,8 +1,8 @@
 #Makefile by Tom Marks
 #Needs to run in linux subsystem (bash)
 
-EE_BIN=test.elf
-EE_OBJS=main.o
+EE_BIN=ELF-ISO/test.elf #linkable file
+EE_OBJS=main.o #linker
 
 EE_LIBS= -ldma -lgraph -ldraw -lmath3d -lpacket -lkernel -ldebug -linput -lpad
 
@@ -14,7 +14,7 @@ EE_OPTFLAGS= -O2
 
 PS2SDK=/usr/local/ps2dev/ps2sdk
 
-ISO_TGT=ISO/build.iso
+ISO_TGT=ELF-ISO/build.iso
 
 include Makefiles/Makefile.eeglobal
 include Makefiles/Makefile.pref
