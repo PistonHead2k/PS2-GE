@@ -16,7 +16,7 @@ namespace Path1
 #include <draw.h>
 #include "texture.c"
 #include "mesh_data.c"
-
+#include "texture.c"
 
 /** Data of our texture (24bit, RGB8) */
 extern unsigned char texture[];

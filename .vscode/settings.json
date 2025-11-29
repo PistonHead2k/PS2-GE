@@ -66,7 +66,8 @@
         "xhash": "cpp",
         "memory_resource": "cpp",
         "string_view": "cpp",
-        "mesh_data.c": "cpp"
+        "mesh_data.c": "cpp",
+        "texture.c": "cpp"
     },
     "C_Cpp.errorSquiggles": "disabled",
 }
