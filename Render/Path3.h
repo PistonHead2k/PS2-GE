@@ -113,9 +113,9 @@ void init_gs(framebuffer_t *frame, zbuffer_t *z, texbuffer_t *texbuf)
 	z->address = graph_vram_allocate(frame->width,frame->height,z->zsm, GRAPH_ALIGN_PAGE);
 
 	// Allocate some vram for the texture buffer
-	texbuf->width = 256;
+	texbuf->width = 128;
 	texbuf->psm = GS_PSM_24;
-	texbuf->address = graph_vram_allocate(256,256,GS_PSM_24,GRAPH_ALIGN_BLOCK);
+	texbuf->address = graph_vram_allocate(128,128,GS_PSM_24,GRAPH_ALIGN_BLOCK);
 
 	// Initialize the screen and tie the first framebuffer to the read circuits.
 	graph_initialize(frame->address, frame->width, frame->height, frame->psm, 0, 0);
@@ -133,7 +133,7 @@ void load_texture(texbuffer_t *texbuf)
 
 	q = packet->data;
 
-	q = draw_texture_transfer(q, texture,256,256,GS_PSM_24,texbuf->address,texbuf->width);
+	q = draw_texture_transfer(q, texture,128,128,GS_PSM_24,texbuf->address,texbuf->width);
 	q = draw_texture_flush(q);
 
 	dma_channel_send_chain(DMA_CHANNEL_GIF,packet->data, q - packet->data, 0,0);
@@ -162,8 +162,8 @@ void setup_texture(texbuffer_t *texbuf)
 	lod.l = 0;
 	lod.k = 0;
 
-	texbuf->info.width = draw_log2(256);
-	texbuf->info.height = draw_log2(256);
+	texbuf->info.width = draw_log2(128);
+	texbuf->info.height = draw_log2(128);
 	texbuf->info.components = TEXTURE_COMPONENTS_RGB;
 	texbuf->info.function = TEXTURE_FUNCTION_DECAL;
 
@@ -268,6 +268,7 @@ qword_t *Model(qword_t *q, MATRIX view_screen, VECTOR object_position, VECTOR ob
 	uint16_t vertex_count = Scene.Mesh[Scene.MeshCount].VertexCount;
 	VECTOR *vertices = Scene.Mesh[Scene.MeshCount].Vertex;
 
+
 	VECTOR *normals = Scene.Mesh[Scene.MeshCount].Normal;
 
 	//Debug
@@ -305,19 +306,33 @@ qword_t *Model(qword_t *q, MATRIX view_screen, VECTOR object_position, VECTOR ob
 	draw_convert_st(st, vertex_count, (vertex_f_t*)temp_vertices, (texel_f_t*)coordinates);
 
 	// Draw the triangles using triangle primitive type.
-	q = draw_prim_start(q, 0, prim, color);
+	u64 *dw;
+	dw = (u64*)draw_prim_start(q, 0, prim, color);
 
 	uint16_t points_count = Scene.Mesh[Scene.MeshCount].FaceCount;
 	uint16_t *points = Scene.Mesh[Scene.MeshCount].Face;
 
+
 	for(i = 0; i < points_count; i++)
 	{
-		q->dw[0] = rgbaq[points[i]].rgbaq;
-		q->dw[1] = xyz[points[i]].xyz;
-		q++;
+		*dw++ = rgbaq[points[i]].rgbaq;
+		*dw++ = st[points[i]].uv;
+		*dw++ = xyz[points[i]].xyz;
 	}
 
-	q = draw_prim_end(q, 2, DRAW_RGBAQ_REGLIST);
+	// Check if we're in middle of a qword or not.
+	if ((u32)dw % 16)
+	{
+
+		*dw++ = 0;
+
+	}
+
+
+	// Only 3 registers rgbaq/st/xyz were used (standard STQ reglist)
+	//q = draw_prim_end((qword_t*)q->dw,3,DRAW_STQ_REGLIST);
+
+	q = draw_prim_end((qword_t*)dw, 3, DRAW_STQ_REGLIST);
 
 	// Define our dmatag for the dma chain.
 	DMATAG_CNT(dmatag,q-dmatag-1,0,0,0);
@@ -353,8 +368,8 @@ void render(framebuffer_t *frame, zbuffer_t *z)
 
 	MATRIX view_screen;
 
-	packets[0] = packet_init(5000, PACKET_NORMAL);
-	packets[1] = packet_init(5000, PACKET_NORMAL);
+	packets[0] = packet_init(100, PACKET_NORMAL);
+	packets[1] = packet_init(100, PACKET_NORMAL);
 
 	// Uncached accelerated
 	flip_pkt = packet_init(3,PACKET_UCAB);
@@ -433,13 +448,15 @@ void render(framebuffer_t *frame, zbuffer_t *z)
 		MoveX = -float(IO::buttons.ljoy_h - 127) / 127.0f * 0.1f; //Rotate Stuff
 		MoveY = float(IO::buttons.ljoy_v - 127) / 127.0f * 0.1f; //Rotate Stuff
 
+		/* im using the camera_normal out of the world matrix
 		VECTOR CameraFront;
 		CameraFront[3] = 0.0f;
 		CameraFront[2] = fastcos(Yaw) * fastcos(Pitch);
         CameraFront[1] = -fastsin(Pitch); //negative because the pitch is inverted relative to movement (inverted vertical diagonal)
         CameraFront[0] = fastsin(Yaw) * fastcos(Pitch);
 		vector_normalize(CameraFront, CameraFront);
-	
+		*/
+
 		#if defined(DEBUG)
 			Debug::pVector("camera front", CameraFront, X|Y|Z);
 		#endif

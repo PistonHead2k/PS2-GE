@@ -1,7 +1,7 @@
 //Main Script by PistonHead2k
 
 /* Debug Info in Console */
-#define DEBUG
+//#define DEBUG
 
 #include <kernel.h>
 #include <stdlib.h>

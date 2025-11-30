@@ -67,7 +67,8 @@
         "memory_resource": "cpp",
         "string_view": "cpp",
         "mesh_data.c": "cpp",
-        "texture.c": "cpp"
+        "texture.c": "cpp",
+        "*.def": "cpp"
     },
     "C_Cpp.errorSquiggles": "disabled",
 }

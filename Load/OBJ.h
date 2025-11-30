@@ -101,8 +101,10 @@ void OBJInterpreter(char *lstring) //Line String
 
 
         //Debug
-        printf("Vertex ");
-        for (int i = 0; i < 4; i++) printf(ToString(Scene.Mesh[Scene.MeshCount].Vertex[Scene.Mesh->VertexCount][i]));
+        printf("Vertex: \n");
+        for (int i = 0; i < 4; i++) 
+            printf(ToString(Scene.Mesh[Scene.MeshCount].Vertex[Scene.Mesh[Scene.MeshCount].VertexCount][i]));
+        //*****
 
         Scene.Mesh[Scene.MeshCount].VertexCount++;
         return;
@@ -135,9 +137,15 @@ void OBJInterpreter(char *lstring) //Line String
             temp_Normal[NormalCount][i] = nXYZ;
         }
 
+         //Debug
+        printf("Normal Count ");
+        printf(ToString((int)NormalCount));
+        //*****
+
         //Debug
         printf("Temporary Normals: \n");
         for (int i = 0; i < 3; i++) printf(ToString(temp_Normal[NormalCount][i]));
+        //*****
        
         
         
@@ -194,7 +202,7 @@ void OBJInterpreter(char *lstring) //Line String
 
         Scene.Mesh[Scene.MeshCount].FaceCount += 3;
     }
-
+    
     /* Normal Index Interpreter */
     if (strchr(lstring, '/') != NULL)
     {
@@ -205,10 +213,10 @@ void OBJInterpreter(char *lstring) //Line String
         /* Separates each value using the "//" between them as reference */
         //We Iterate 3 Times for V0, V1, and V2
         //We Subtract 1 Because The OBJ Face Index Start at 1, so we make it start at 0.
-        bstring = strtok(bstring, "//");
+        bstring = strtok(bstring, "/");
         for (int i = 0; i < 3; i++)
         {
-            bstring = strtok(nullptr, "//");
+            bstring = strtok(nullptr, "/");
             uint16_t niXYZ = atoi(bstring) - 1;
 
             /* Reallocate Normal[] Array */

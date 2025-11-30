@@ -48,8 +48,12 @@ raw:
 %.o: %.vsm
 	$(EE_DVP) $< -o $@
 
-#github
-gitpush: 
+#github push
+gp: 
 	git add ./
 	git commit -a
 	git push https://github.com/PistonHead2k/PS2-GE.git
+
+#pcsx2 launch
+test:
+	pcsx2 elf-iso/build.iso --nogui --console
