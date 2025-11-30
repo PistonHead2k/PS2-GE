@@ -47,3 +47,9 @@ raw:
 
 %.o: %.vsm
 	$(EE_DVP) $< -o $@
+
+#github
+gitpush: 
+	git add ./
+	git commit -a
+	git push https://github.com/PistonHead2k/PS2-GE.git
